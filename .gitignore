@@ -1,0 +1,8 @@
+.merlin
+.bsb.lock
+npm-debug.log
+/lib/
+/node_modules/
+/.vscode/
+/coverage
+*.bs.js

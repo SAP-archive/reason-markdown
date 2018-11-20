@@ -1,0 +1,30 @@
+{
+    "name": "@re-wunder/vfmd_parser",
+    "sources": [
+        {
+            "dir": "src",
+            "subdirs": true
+        },
+        {
+            "dir": "test",
+            "subdirs": true,
+            "type": "dev"
+        }
+    ],
+    "package-specs": [
+        {
+            "module": "es6",
+            "in-source": false
+        },
+        {
+            "module": "commonjs",
+            "in-source": false
+        }
+    ],
+    "suffix": ".bs.js",
+    "namespace": false,
+    "bs-dev-dependencies": [
+        "@glennsl/bs-jest"
+    ],
+    "refmt": 3
+}

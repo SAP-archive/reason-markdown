@@ -1,0 +1,25 @@
+{
+    "name": "@re-wunder/vfmd_parser",
+    "version": "0.1.0",
+    "main": "src/Parser.re",
+    "scripts": {
+        "build": "node_modules/bs-platform/lib/bsb -make-world",
+        "build:watch": "node_modules/bs-platform/lib/bsb -make-world -w",
+        "clean": "node_modules/bs-platform/lib/bsb -clean-world",
+        "test": "npm run build && ./node_modules/.bin/jest"
+    },
+    "keywords": [
+        "BuckleScript"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {},
+    "devDependencies": {
+        "@glennsl/bs-jest": "^0.4.3",
+        "bs-platform": "^3.1.5"
+    },
+    "jest": {
+        "testRegex": "/lib/js/test/.*_test.bs.js",
+        "testURL": "http://localhost/"
+    }
+}
