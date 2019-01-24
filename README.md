@@ -1,12 +1,69 @@
 # vfmd_parser
 
-This repository contains a parser for markdown documents provided in vfmd syntax. The parser is written in [Reason](reasonml.github.io) and aligned on [the vfmd specification](http://www.vfmd.org/vfmd-spec/specification/).
+## Table of Contents
+
+1. [Description](#description)
+2. [Requirements](#requirements)
+3. [Download and Installation](#download-and-installation)
+4. [Known Issues](#known-issues)
+5. [How to obtain support](#how-to-obtain-support)
+6. [Contributing](#contributing)
+7. [To-Do](#to-do)
+8. [Version](#version)
+9. [Supported syntax elements](#supported-syntax-elements)
+  1. [Block](#block)
+  2. [Span](#span)
+10. [License](#license)
+
+## Description
+
+This repository contains a parser for markdown documents provided in vfmd syntax. The parser is written in [Reason](reasonml.github.io) and aligned on [the vfmd specification](http://www.vfmd.org/vfmd-spec/specification/).  
+This library is compiled to `JavaScript` by the `BuckleScript`-Compiler and uses `JavaScript-Regexes`.
+
+## Requirements
+
+This project doesn't depend on any third-party library or SAP product.
+
+## Download and Installation
+
+Add the repository to your `dependencies` in your `package.json`
+```json
+"dependencies" : {
+  "@sap/reason-markdown": "git+https://github.com/SAP/reason-markdown.git"
+}
+```
+For `Bucklescript` projects add `@sap/reason-markdown` to `bs-dependencies` in your `bs-config.json`
+```json
+"bs-dependencies": [
+  "@sap/reason-markdown"
+]
+```
+
+## Known Issues
+
+This is a work-in-progress project.  
+
+* Missing `Markdown` syntax elements (To see a list of the available elements click [here](#supported-syntax-elements))
+
+## How to obtain support
+
+Please ask questions or report bugs via `GitHub issues`
+
+## Contributing
+
+Feel free to open a PullRequest with any suggestion and add a description of the bugs you solved/the features you added.
+
+## To-Do
+
+- [ ] Add missing `Markdown` syntax elements (To see a list of the available elements click [here](#supported-syntax-elements))
+- [ ] Make the parser modular, so one can include/exclude syntax elements
+- [ ] Make the parser extendable
 
 ## Version
 
 The current version of the vfmd parser is 0.1.0.
 
-## Supported Syntax elements
+## Supported syntax elements
 
 Currently supported elements (vfmd syntax guide: [guide](http://www.vfmd.org/vfmd-spec/syntax/)):
 - [ ] Block
@@ -51,7 +108,7 @@ the lower is the level of the produced header:
 ```
 The lowest level of an Atx-Style-Header is `6`. All Headers which start with more than six `#` will automatically result in level
 6 Headers.  
-  
+
 ##### Setext-Style-Header
 
 You can create a Stext-Style-Header by writing a line with the Header text which is immediately followed by a line with minimum 3 starting `-` or `=`.
@@ -139,7 +196,7 @@ Then you can reference the url in your images and links like so:
 
 #### Horizontal Rule
 
-You can create a Horizontal rule by writing a blank line which is immediately followed by a line which starts with at least 3 `-`-signs, `_`-signs, or `*`-signs. 
+You can create a Horizontal rule by writing a blank line which is immediately followed by a line which starts with at least 3 `-`-signs, `_`-signs, or `*`-signs.
 
 ```
 
@@ -188,7 +245,7 @@ There are three different ways to write a link in markdown:
 [Provide the url with a reference-id][reference-id]
 ```
 
-The text sequence in the first square brackets is the title, which can contain other span-level-elements. 
+The text sequence in the first square brackets is the title, which can contain other span-level-elements.
 
 #### Image
 
