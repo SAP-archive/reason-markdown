@@ -1,19 +1,4 @@
-# vfmd_parser
-
-## Table of Contents
-
-1. [Description](#description)
-2. [Requirements](#requirements)
-3. [Download and Installation](#download-and-installation)
-4. [Known Issues](#known-issues)
-5. [How to obtain support](#how-to-obtain-support)
-6. [Contributing](#contributing)
-7. [To-Do](#to-do)
-8. [Version](#version)
-9. [Supported syntax elements](#supported-syntax-elements)
-    1. [Block](#block)  
-    2. [Span](#span)
-10. [License](#license)
+# Markdown parser for REASON
 
 ## Description
 
@@ -22,9 +7,9 @@ This library is compiled to `JavaScript` by the `BuckleScript`-Compiler and uses
 
 ## Requirements
 
-This project doesn't depend on any third-party library or SAP product.
+This project doesn't depend on any third-party library.  No downloads are required.
 
-## Download and Installation
+## Installation
 
 Add the repository to your `dependencies` in your `package.json`
 ```json
@@ -47,11 +32,11 @@ This is a work-in-progress project.
 
 ## How to obtain support
 
-Please ask questions or report bugs via `GitHub issues`
+Please ask questions or report bugs via [GitHub issues](https://github.com/SAP/reason-markdown/issues)
 
 ## Contributing
 
-Feel free to open a PullRequest with any suggestion and add a description of the bugs you solved/the features you added.
+We welcome external contributions.  Feel free to open a Pull Request with any suggestion and add a description of the bugs you solved/the features you added.
 
 ## To-Do
 
@@ -63,7 +48,10 @@ Feel free to open a PullRequest with any suggestion and add a description of the
 
 The current version of the vfmd parser is 0.1.0.
 
-## Supported syntax elements
+
+## Usage
+
+### Supported syntax elements
 
 Currently supported elements (vfmd syntax guide: [guide](http://www.vfmd.org/vfmd-spec/syntax/)):
 - [ ] Block
@@ -89,15 +77,15 @@ Currently supported elements (vfmd syntax guide: [guide](http://www.vfmd.org/vfm
     - [x] simplify ast
     - [x] backward parsing
 
-## Syntax Guide
+### Syntax Guide
 
-### Block
+#### Block
 
-#### Header
+##### Header
 
 A header is a block-level element which can contain multiple span-level elements.
 
-##### Atx-Style
+###### Atx-Style
 
 You can create an Atx-Style-Header by starting a line with multiple `#`-signs followed by a blank. The more hashtag signs you write
 the lower is the level of the produced header:
@@ -109,7 +97,7 @@ the lower is the level of the produced header:
 The lowest level of an Atx-Style-Header is `6`. All headers which start with more than six `#`-signs will automatically result in level
 six headers.  
 
-##### Setext-Style-Header
+###### Setext-Style-Header
 
 You can create a Setext-Style-Header by writing a line with the header text which is immediately followed by a line with minimum 3 starting `-`-signs or `=`-signs.
 Setext-Style-Headers only support two levels:
@@ -123,7 +111,7 @@ Header level 2
 
 Finishing a Setext-Style-Header with `=`-signs will result in a level one header, while finishing a Setext-Style-Header with `-`-signs will result in a level two header.
 
-#### Quotes
+##### Quotes
 
 You can create a Quote by starting a line with a `>`-sign. All immediately following lines which also start with a `>`-sign will belong to that quote. A Quote can contain code-blocks and paragraphs.
 
@@ -134,7 +122,7 @@ You can create a Quote by starting a line with a `>`-sign. All immediately follo
 > over multiple lines
 ```
 
-#### Unordered list
+##### Unordered list
 
 You can create an unordered list by starting a line with either a `-`-sign, `+`-sign, or `*`-sign followed by a blank. The chosen sign for the first list item is called the starter pattern. Every following line which doesn't begin with the starter pattern belongs will be added to the current list item. To start another list item in the same list you simply start a new line with the starter pattern. An unordered list can contain one to multiple list items, which can contain one to multiple block-level-elements. If a list item is followed by two blank lines or one blank line and a line which doesn't start with the starter pattern, the list is considered finished.
 
@@ -154,7 +142,7 @@ You can create an unordered list by starting a line with either a `-`-sign, `+`-
 - this is not
 ```
 
-#### Ordered list
+##### Ordered list
 
 You can create an ordered list by starting a line with a number followed by a dot and a blank. The enumeration of the list items will start at the first items number. All following numbers are ignored. You can use an ordered list the same way as an unordered list.
 
@@ -175,7 +163,7 @@ You can create an ordered list by starting a line with a number followed by a do
 2. this not
 ```
 
-#### Reference Resolution
+##### Reference Resolution
 
 A Reference-Resolution-Block provides references urls which can be used in link- or image-spans by stating the reference-id of the block.
 These blocks will not result in any output and are only used to provide document wide url-references.
@@ -191,7 +179,7 @@ You can reference a url by providing the reference-id in square brackets.
 ![I'm an image with reference-id][reference-id]
 ```
 
-#### Horizontal Rule
+##### Horizontal Rule
 
 You can create a horizontal rule by writing a blank line which is immediately followed by a line which starts with at least three `-`-signs, `_`-signs, or `*`-signs.
 
@@ -204,13 +192,13 @@ You can create a horizontal rule by writing a blank line which is immediately fo
 ___
 ```
 
-#### Paragraph
+##### Paragraph
 
 Lines which can't be assigned to a block will result in a paragraph. A paragraph can be seen as plain (formatted) text, which is why a paragraph block can only contain span-level elements.
 
-### Span
+#### Span
 
-#### Emphatic stress
+##### Emphatic stress
 
 You can emphasize specific parts of a text by wrapping the part either into a `*`-sign or a `_`-sign. A emphasized text sequence can contain other span-level-elements.  
 **NOTICE**: Emphasized text inside emphasized text will always be interpreted as _text_.
@@ -219,7 +207,7 @@ You can emphasize specific parts of a text by wrapping the part either into a `*
 This is normal text *this* and _this_ will be emphasized
 ```
 
-#### Strong importance
+##### Strong importance
 
 You can highlight text with strong importance by wrapping the part either into two `*`-signs or two `_`-signs. A text sequence with strong importance can contain other span-level-elements.  **NOTICE**: A text span with strong importance inside of a text span with strong importance will always be interpreted as _text_.
 
@@ -227,7 +215,7 @@ You can highlight text with strong importance by wrapping the part either into t
 This is normal text **this** and __this__ will be displayed as strong importance
 ```
 
-#### Link
+##### Link
 
 A link consists of two parts:
 - The link title
@@ -243,7 +231,7 @@ There are three different ways to display a link in markdown:
 
 The text sequence in the first square brackets is the title, which can contain other span-level-elements.
 
-#### Image
+##### Image
 
 An image consists of three parts:
 - The link title _(optional)_
@@ -260,7 +248,7 @@ There are three different ways to display an image in markdown:
 
 The text sequence in the first square brackets is the alternative text, other than the link it can **just contain text**.
 
-#### Inline Code
+##### Inline Code
 
 You can create inline-code sequences by wrapping a sequence of text into `` ` ``-signs. All the text which is between the backticks will be interpreted as plain text. You can vary the amount of backticks, so you can also display backticks in your code.
 
