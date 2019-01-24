@@ -11,8 +11,8 @@
 7. [To-Do](#to-do)
 8. [Version](#version)
 9. [Supported syntax elements](#supported-syntax-elements)
-  1. [Block](#block)
-  2. [Span](#span)
+    1. [Block](#block)  
+    2. [Span](#span)
 10. [License](#license)
 
 ## Description
