@@ -95,24 +95,24 @@ Currently supported elements (vfmd syntax guide: [guide](http://www.vfmd.org/vfm
 
 #### Header
 
-A Header is a block-level element which can contain multiple span-level elements.
+A header is a block-level element which can contain multiple span-level elements.
 
 ##### Atx-Style
 
-You can create an Atx-Style-Header by starting a line with multiple `#`-signs followed by a blank. The more Hashtags you write
+You can create an Atx-Style-Header by starting a line with multiple `#`-signs followed by a blank. The more hashtag signs you write
 the lower is the level of the produced header:
 
 ```
 # Header level 1
 ## Header level 2
 ```
-The lowest level of an Atx-Style-Header is `6`. All Headers which start with more than six `#` will automatically result in level
-6 Headers.  
+The lowest level of an Atx-Style-Header is `6`. All headers which start with more than six `#`-signs will automatically result in level
+six headers.  
 
 ##### Setext-Style-Header
 
-You can create a Stext-Style-Header by writing a line with the Header text which is immediately followed by a line with minimum 3 starting `-` or `=`.
-Setext-Style-Headers only support two different levels:
+You can create a Setext-Style-Header by writing a line with the header text which is immediately followed by a line with minimum 3 starting `-`-signs or `=`-signs.
+Setext-Style-Headers only support two levels:
 
 ```
 Header level 1
@@ -121,13 +121,11 @@ Header level 2
 ---
 ```
 
-Finishing a Setext-Style-Header with `=`-signs will result in a level 1 header, while finishing a Setext-Style-Header with `-`-signs
-will result in a level 2 header.
+Finishing a Setext-Style-Header with `=`-signs will result in a level one header, while finishing a Setext-Style-Header with `-`-signs will result in a level two header.
 
 #### Quotes
 
-You can create a Quote by starting a line with a `>`-sign. All immediately following lines which also start with a `>`-sign will belong
-to that quote. A Quote can contain code-blocks and paragraphs.
+You can create a Quote by starting a line with a `>`-sign. All immediately following lines which also start with a `>`-sign will belong to that quote. A Quote can contain code-blocks and paragraphs.
 
 ```
 > This is a single-line-quote
@@ -138,8 +136,7 @@ to that quote. A Quote can contain code-blocks and paragraphs.
 
 #### Unordered list
 
-You can create a Unordered list by starting a line with either an `-`-sign, `+`-sign, or `*`-sign followed by a blank. Every following line which doesn't begin with this pattern belongs to one list item. To start another list item in the same list you can just repeat the pattern from the first list item of the list. A Unordered list contains multiple list items, which can contain multiple block-level-elements. You can finish a Unordered list
-by writing two following blank lines or one following blank line which is not followed by a line which starts with the starter pattern.
+You can create an unordered list by starting a line with either a `-`-sign, `+`-sign, or `*`-sign followed by a blank. The chosen sign for the first list item is called the starter pattern. Every following line which doesn't begin with the starter pattern belongs will be added to the current list item. To start another list item in the same list you simply start a new line with the starter pattern. An unordered list can contain one to multiple list items, which can contain one to multiple block-level-elements. If a list item is followed by two blank lines or one blank line and a line which doesn't start with the starter pattern, the list is considered finished.
 
 ```
 - Start a list with this pattern
@@ -159,7 +156,7 @@ by writing two following blank lines or one following blank line which is not fo
 
 #### Ordered list
 
-You can create a Ordered list by starting a line with a number followed by a dot and a blank. The enumeration of the list items will start at the first items number. All following number are ignored. You can use a Ordered list the same way as a Unordered list
+You can create an ordered list by starting a line with a number followed by a dot and a blank. The enumeration of the list items will start at the first items number. All following numbers are ignored. You can use an ordered list the same way as an unordered list.
 
 ```
 1. Start a list with this pattern
@@ -180,14 +177,14 @@ You can create a Ordered list by starting a line with a number followed by a dot
 
 #### Reference Resolution
 
-A Reference-Resolution-Block provides references to urls which can be used in link- or image-spans by stating the reference-id of the Block.
-These blocks will not result in any ouput and are just used to provide urls document wide. You can create a Reference-Resolution-Block like so:
+A Reference-Resolution-Block provides references urls which can be used in link- or image-spans by stating the reference-id of the block.
+These blocks will not result in any output and are only used to provide document wide url-references.
 
 ```
 [reference-id]: url/to/resource
 ```
 
-Then you can reference the url in your images and links like so:
+You can reference a url by providing the reference-id in square brackets.
 
 ```
 [I'm a link with reference-id][reference-id]
@@ -196,7 +193,7 @@ Then you can reference the url in your images and links like so:
 
 #### Horizontal Rule
 
-You can create a Horizontal rule by writing a blank line which is immediately followed by a line which starts with at least 3 `-`-signs, `_`-signs, or `*`-signs.
+You can create a horizontal rule by writing a blank line which is immediately followed by a line which starts with at least three `-`-signs, `_`-signs, or `*`-signs.
 
 ```
 
@@ -209,23 +206,22 @@ ___
 
 #### Paragraph
 
-A Paragraph is every line which doesn't belong to one of the above block-level elements. A Paragraph can be seen as plain (formatted) text, which
-is why a Paragraph block can only contain span-level elements.
+Lines which can't be assigned to a block will result in a paragraph. A paragraph can be seen as plain (formatted) text, which is why a paragraph block can only contain span-level elements.
 
 ### Span
 
 #### Emphatic stress
 
-You can emphase specific parts of a text by wrapping the part either into a `*`-sign or a `_`-sign. A emphased text sequence can contain other span-level-elements.  
-**NOTICE**: Emphased text inside emphased text will always be interpreted as _text_.
+You can emphasize specific parts of a text by wrapping the part either into a `*`-sign or a `_`-sign. A emphasized text sequence can contain other span-level-elements.  
+**NOTICE**: Emphasized text inside emphasized text will always be interpreted as _text_.
 
 ```
-This is normal text *this* and _this_ will be emphased
+This is normal text *this* and _this_ will be emphasized
 ```
 
 #### Strong importance
 
-You can display specific parts of a text as strong important by wrapping the part either into two `*`-signs or two `_`-signs. A important text sequence can contain other span-level-elements.  **NOTICE**: Important text inside important text will always be interpreted as _text_.
+You can highlight text with strong importance by wrapping the part either into two `*`-signs or two `_`-signs. A text sequence with strong importance can contain other span-level-elements.  **NOTICE**: A text span with strong importance inside of a text span with strong importance will always be interpreted as _text_.
 
 ```
 This is normal text **this** and __this__ will be displayed as strong importance
@@ -237,7 +233,7 @@ A link consists of two parts:
 - The link title
 - The link url _(optional)_
 
-There are three different ways to write a link in markdown:
+There are three different ways to display a link in markdown:
 
 ```
 [Provide the url in curved brackets](link/one)
@@ -254,7 +250,7 @@ An image consists of three parts:
 - The link url _(optional)_
 - The alternative text
 
-There are three different ways to write an image in markdown:
+There are three different ways to display an image in markdown:
 
 ```
 ![Alternative text](url/to/image/one "optional title")
