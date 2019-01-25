@@ -2,12 +2,12 @@
 
 ## Description
 
-This repository contains a parser for markdown documents (provided in [vanilla-flavored-markdown-syntax](http://www.vfmd.org/)) written in [Reason](https://reasonml.github.io/) which produces an abstract syntax tree (AST). The parser provides two functions:
+This repository contains a parser for markdown documents (provided in [vanilla-flavored-markdown-syntax](http://www.vfmd.org/)) written in [Reason](https://reasonml.github.io/), which produces an abstract syntax tree (AST). The parser provides two functions:
 
 * Parsing a markdown string to an AST
 * Transforming an AST back to a markdown string
 
-The AST can then get interpreted by your source code (for example: Transforming it into HTML for a markdown-editor preview). The project was originally initiated to provide markdown support in a [ReasonReact](https://reasonml.github.io/reason-react/) web app. That is why the project is compiled to JavaScript using the [BuckleScript-Compiler](https://bucklescript.github.io/).
+The AST can then get interpreted by your source code (for example: Transforming it into HTML for a markdown-editor preview). The project was originally initiated to provide markdown support in a [ReasonReact](https://reasonml.github.io/reason-react/) web app, which is why the project is compiled to JavaScript using the [BuckleScript-Compiler](https://bucklescript.github.io/).
 
 ## Requirements
 
