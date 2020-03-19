@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "main": "src/Parser.re",
     "scripts": {
-        "build": "node_modules/bs-platform/lib/bsb -make-world",
-        "build:watch": "node_modules/bs-platform/lib/bsb -make-world -w",
-        "clean": "node_modules/bs-platform/lib/bsb -clean-world",
+        "build": "node_modules/bs-platform/bsb -make-world",
+        "build:watch": "node_modules/bs-platform/bsb -make-world -w",
+        "clean": "node_modules/bs-platform/bsb -clean-world",
         "test": "npm run build && ./node_modules/.bin/jest"
     },
     "keywords": [
@@ -16,7 +16,7 @@
     "dependencies": {},
     "devDependencies": {
         "@glennsl/bs-jest": "^0.5.0",
-        "bs-platform": "^7.0.1"
+        "bs-platform": "^7.2.0"
     },
     "jest": {
         "testRegex": "/lib/js/test/.*_test.bs.js",
