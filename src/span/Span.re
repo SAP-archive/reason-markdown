@@ -68,28 +68,42 @@ let rec transform_nodes_to_spans: list(SpanTypes.t) => list(SpanTypes.span) =
       }
     };
 
+let merge_lines: list(string) => string =
+  source => {
+    let result: ref(string) = ref("");
+    let current_position: ref(int) = ref(0);
 
-let merge_lines: list(string) => string = source => {
-  let result: ref(string) = ref("");
-  let current_position: ref(int) = ref(0);
+    while (current_position^ < List.length(source)) {
+      let current_string = List.nth(source, current_position^);
+      let matches_line_break =
+        Js.String.match(Regex.markdown_line_break, current_string);
 
-  while (current_position^ < List.length(source)) {
-    let current_string = List.nth(source, current_position^);
-    let matches_line_break = Js.String.match(Regex.markdown_line_break, current_string);
+      switch (matches_line_break) {
+      | None =>
+        result :=
+          String.concat(
+            "",
+            [
+              result^,
+              current_string,
+              current_position^ == List.length(source) - 1 ? "" : " ",
+            ],
+          )
+      | Some(_) =>
+        let final =
+          Js.String.replaceByRe(
+            Regex.markdown_line_break,
+            current_position^ == List.length(source) - 1 ? "" : "\n",
+            current_string,
+          );
+        result := String.concat("", [result^, final]);
+      };
 
-    switch matches_line_break {
-    | None => 
-      result := String.concat("", [result^, current_string, (current_position^ == List.length(source) - 1 ? "" : " ")]);
-    | Some(_) => 
-      let final = Js.String.replaceByRe(Regex.markdown_line_break, current_position^ == List.length(source) - 1? "" : "\n", current_string);
-      result := String.concat("", [result^, final]);
+      current_position := current_position^ + 1;
     };
 
-    current_position := current_position^ + 1;
+    result^;
   };
-
-  result^;
-};
 
 /* Main loop which calls element methods to recognize span tags */
 let identify: list(string) => list(SpanTypes.span) =
@@ -109,9 +123,7 @@ let identify: list(string) => list(SpanTypes.span) =
         );
       /* The main loop decides which element methody are called by looking at the first characters */
 
-      let remaining_length = String.length(remaining_characters^);
-
-      if (Js.Re.test(remaining_characters^, Regex.escape_symbol)) {
+      if (Js.Re.test_(Regex.escape_symbol, remaining_characters^)) {
         let escape_match =
           Js.String.match(Regex.escapable, remaining_characters^);
 
@@ -126,16 +138,16 @@ let identify: list(string) => list(SpanTypes.span) =
           Stack.push(SpanTag(TextFragment(escaped_symbol)), stack^);
           current_position := current_position^ + capture_length;
         };
-      } else if (Js.Re.test(remaining_characters^, Regex.square_bracket_open)
-                 || Js.Re.test(
-                      remaining_characters^,
+      } else if (Js.Re.test_(Regex.square_bracket_open, remaining_characters^)
+                 || Js.Re.test_(
                       Regex.square_bracket_close,
+                      remaining_characters^,
                     )) {
         let consumed_characters =
           Link.identify(stack^, input_character_sequence, current_position^);
         current_position := current_position^ + consumed_characters;
-      } else if (Js.Re.test(remaining_characters^, Regex.asterisk)
-                 || Js.Re.test(remaining_characters^, Regex.underscore)) {
+      } else if (Js.Re.test_(Regex.asterisk, remaining_characters^)
+                 || Js.Re.test_(Regex.underscore, remaining_characters^)) {
         let consumed_characters =
           Emphasis.identify(
             stack^,
@@ -143,7 +155,7 @@ let identify: list(string) => list(SpanTypes.span) =
             current_position^,
           );
         current_position := current_position^ + consumed_characters;
-      } else if (Js.Re.test(remaining_characters^, Regex.backtick)) {
+      } else if (Js.Re.test_(Regex.backtick, remaining_characters^)) {
         let consumed_characters =
           CodeSpan.identify(
             stack^,
@@ -151,11 +163,11 @@ let identify: list(string) => list(SpanTypes.span) =
             current_position^,
           );
         current_position := current_position^ + consumed_characters;
-      } else if (Js.Re.test(remaining_characters^, Regex.maybe_image_link)) {
+      } else if (Js.Re.test_(Regex.maybe_image_link, remaining_characters^)) {
         let consumed_characters =
           Image.identify(stack^, input_character_sequence, current_position^);
         current_position := current_position^ + consumed_characters;
-      } else if (Js.Re.test(remaining_characters^, Regex.line_break)) {
+      } else if (Js.Re.test_(Regex.line_break, remaining_characters^)) {
         Stack.push(SpanTag(LineBreak), stack^);
         current_position := current_position^ + 1;
       } else {
@@ -252,6 +264,7 @@ let read_code: (list(SpanTypes.span), int) => (AST.span, int) =
       | ClosingCodeTag =>
         current_position := current_position^ + 1;
         escape := true;
+      | _ => ()
       };
     };
 
@@ -347,10 +360,10 @@ let rec get_ast: (list(SpanTypes.span), BlockContext.t) => AST.spans =
       let current_span = List.nth(source, current_position^);
 
       switch (current_span) {
-      | LineBreak => 
+      | LineBreak =>
         ast := List.append(ast^, [AST.LineBreak]);
         current_position := current_position^ + 1;
-      | TextFragment(text) =>
+      | TextFragment(_text) =>
         let (text, consumed_span_count) =
           read_text(source, current_position^);
 

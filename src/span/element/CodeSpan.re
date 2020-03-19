@@ -129,7 +129,7 @@ let identify: (Stack.t(SpanTypes.t), string, int) => int =
     };
 
     switch (closing_code_string^) {
-    | Some(value) =>
+    | Some(_value) =>
       let code_span_length =
         opening_backticks_count^ * 2 + code_content_length^;
 
@@ -157,12 +157,12 @@ let rec find_smallest_possible_length: (string, int) => int =
 
 let get_markdown: string => string =
   data =>
-    if (Js.Re.test(data, Js.Re.fromString("[^`]`[^`]|^`|`$"))) {
+    if (Js.Re.test_(Js.Re.fromString("[^`]`[^`]|^`|`$"), data)) {
       let smallest_possible_length = find_smallest_possible_length(data, 2);
 
       let pattern: ref(string) = ref("");
 
-      for (count in 0 to smallest_possible_length) {
+      for (_count in 0 to smallest_possible_length) {
         pattern := pattern^ ++ "`";
       };
 

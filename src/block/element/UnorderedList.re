@@ -1,5 +1,5 @@
 let is_start_line: string => bool =
-  source => Js.Re.test(source, Js.Re.fromString("^( *[\\-\\*\\+] +)[^ ]"));
+  source => Js.Re.test_(Js.Re.fromString("^( *[\\-\\*\\+] +)[^ ]"), source);
 
 let get_starter_pattern: string => string =
   source => {
@@ -17,13 +17,13 @@ let escape_starter_pattern: string => string =
 
     escaped_pattern :=
       Js.String.replaceByRe(
-        Js.Re.fromStringWithFlags("\\+", "g"),
+        Js.Re.fromStringWithFlags("\\+", ~flags="g"),
         "\\+",
         escaped_pattern^,
       );
     escaped_pattern :=
       Js.String.replaceByRe(
-        Js.Re.fromStringWithFlags("\\*", "g"),
+        Js.Re.fromStringWithFlags("\\*", ~flags="g"),
         "\\*",
         escaped_pattern^,
       );
@@ -40,59 +40,59 @@ let rec read_till_end_line: (list(string), string) => list(string) =
     } else if (List.length(lines) > 1
                && Util.isBlankLine(List.nth(lines, 0))
                && !
-                    Js.Re.test(
-                      List.nth(lines, 1),
+                    Js.Re.test_(
                       Js.Re.fromString(
                         "^" ++ escape_starter_pattern(starterPattern),
                       ),
+                      List.nth(lines, 1),
                     )
                && !
-                    Js.Re.test(
-                      List.nth(lines, 1),
+                    Js.Re.test_(
                       Js.Re.fromString(
                         {js|^\u0020{|js}
                         ++ string_of_int(String.length(starterPattern))
                         ++ {js|,}[^ \u0020]|js},
                       ),
+                      List.nth(lines, 1),
                     )) {
       [];
     } else if (List.length(lines) > 1
                && ! Util.isBlankLine(List.nth(lines, 0))
                && !
-                    Js.Re.test(
-                      List.nth(lines, 1),
+                    Js.Re.test_(
                       Js.Re.fromString(
                         "^" ++ escape_starter_pattern(starterPattern),
                       ),
+                      List.nth(lines, 1),
                     )
                && !
-                    Js.Re.test(
-                      List.nth(lines, 1),
+                    Js.Re.test_(
                       Js.Re.fromString(
                         {js|^\u0020{|js}
                         ++ string_of_int(String.length(starterPattern))
                         ++ {js|,}[^ \u0020]|js},
                       ),
+                      List.nth(lines, 1),
                     )
                && !
-                    Js.Re.test(
-                      List.nth(lines, 1),
+                    Js.Re.test_(
                       Js.Re.fromString({js|^\u0020{4,}|js}),
+                      List.nth(lines, 1),
                     )
                && (
-                 Js.Re.test(
-                   List.nth(lines, 1),
+                 Js.Re.test_(
                    Js.Re.fromString("^( *[*\\-+] +)[^ ]"),
+                   List.nth(lines, 1),
                  )
-                 || Js.Re.test(
-                      List.nth(lines, 1),
+                 || Js.Re.test_(
                       Js.Re.fromString({js|^( *([0-9]+). +)[^ ]|js}),
-                    )
-                 || Js.Re.test(
                       List.nth(lines, 1),
+                    )
+                 || Js.Re.test_(
                       Js.Re.fromString(
                         "^ *((\\* *\\* *\\* *[* ]*)|(- *- *- *[- ]*)|(_ *_ *_ *[_ ]*))$",
                       ),
+                      List.nth(lines, 1),
                     )
                )) {
       [List.hd(lines)];
@@ -185,7 +185,7 @@ let get_list_items:
               );
           };
         };
-      | Some(captures) =>
+      | Some(_captures) =>
         if (found_start^) {
           list_items := List.append(list_items^, [current_list_item^]);
         } else {

@@ -94,7 +94,7 @@ let get_right_fringe_rank: (string, int) => int =
         String.length(source) - current_position,
       );
 
-    if (Js.Re.test(remaining_input, Regex.match_at_end)) {
+    if (Js.Re.test_(Regex.match_at_end, remaining_input)) {
       0;
     } else {
       let match_middle =
@@ -372,7 +372,6 @@ let interprete_as_potential_closing_tag: emphasis_indicator_string => int =
 
       if (! top_emphasis_node_exists(current_node_type)) {
         Stack.push(SpanTag(TextFragment(current_tag^.text)), stack^);
-        String.length(current_tag^.text);
         current_tag := {...current_tag^, text: ""};
       } else {
         let nodes = get_nodes_from_stack(current_node_type);
@@ -385,10 +384,7 @@ let interprete_as_potential_closing_tag: emphasis_indicator_string => int =
       };
 
       if (String.length(current_tag^.text) == 0) {
-        switch (remaining_tags^) {
-        | [head, ...tail] => remaining_tags := tail
-        | [head] => remaining_tags := []
-        };
+        remaining_tags := List.tl(remaining_tags^);
       };
     };
 

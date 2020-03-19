@@ -1,8 +1,8 @@
 let get_start: list(string) => option(BlockTypes.reference_resolution) =
   lines =>
-    if (Js.Re.test(
-          List.hd(lines),
+    if (Js.Re.test_(
           Js.Re.fromString("^ {0,4}\\[.*\\] *:.*"),
+          List.hd(lines),
         )) {
       let referenceMatch =
         Js.String.match(
@@ -37,16 +37,16 @@ let get_start: list(string) => option(BlockTypes.reference_resolution) =
 
 let getLineCount: (BlockTypes.reference_resolution, list(string)) => int =
   (block, lines) =>
-    if (Js.Re.test(
-          block.refDefinitionTrailingSequence,
+    if (Js.Re.test_(
           Js.Re.fromString({js|^[^\u0020]|js}),
+          block.refDefinitionTrailingSequence,
         )
         && List.length(lines) > 1
-        && Js.Re.test(
-             List.nth(lines, 1),
+        && Js.Re.test_(
              Js.Re.fromString(
                "^ +(\"(([^\"\\]|\\.)*)\"|\'(([^'\\]|\\.)*)\'|\\(([^\\()]|\\.)*\\)) *",
              ),
+             List.nth(lines, 1),
            )) {
       2;
     } else {

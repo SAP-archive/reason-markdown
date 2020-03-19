@@ -79,9 +79,9 @@ let identify: (Stack.t(SpanTypes.t), string, int) => int =
 
         image_ref_tag_length;
       | None =>
-        if (Js.Re.test(
-              residual_image_sequence,
+        if (Js.Re.test_(
               Regex.residual_image_sequence_url_indicator,
+              residual_image_sequence,
             )) {
           let unprocessed_image_source_string = ref("");
           let image_source_pattern_match_length = ref(0);
@@ -167,7 +167,7 @@ let identify: (Stack.t(SpanTypes.t), string, int) => int =
                 attributes_string :=
                   Some(
                     Js.String.replaceByRe(
-                      Js.Re.fromStringWithFlags("\"", "g"),
+                      Js.Re.fromStringWithFlags("\"", ~flags="g"),
                       "",
                       captures[1],
                     ),
@@ -248,7 +248,7 @@ let rec find_reference_id:
   (list(BlockContext.reference), string) => option(string) =
   (reference, url) =>
     switch (reference) {
-    | [(reference_id, link_url, link_title), ...tail] =>
+    | [(reference_id, link_url, _link_title), ...tail] =>
       if (link_url == url) {
         Some(reference_id);
       } else {

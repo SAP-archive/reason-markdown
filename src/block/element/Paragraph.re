@@ -4,28 +4,28 @@ let rec read_till_end: list(string) => list(string) =
       [];
     } else if (List.length(source) > 1
                && !
-                    Js.Re.test(
-                      List.nth(source, 1),
+                    Js.Re.test_(
                       Js.Re.fromString({js|^\u0020{4,}|js}),
+                      List.nth(source, 1),
                     )
                && (
-                 Js.Re.test(
-                   List.nth(source, 1),
+                 Js.Re.test_(
                    Js.Re.fromString(
                      "^ *((\\* *\\* *\\* *[* ]*)|(- *- *- *[- ]*)|(_ *_ *_ *[_ ]*))$",
                    ),
+                   List.nth(source, 1),
                  )
-                 || Js.Re.test(
-                      List.nth(source, 1),
+                 || Js.Re.test_(
                       Js.Re.fromString({js|^\u0020*>|js}),
-                    )
-                 || Js.Re.test(
                       List.nth(source, 1),
+                    )
+                 || Js.Re.test_(
                       Js.Re.fromString({js|^( *([0-9]+). +)[^ ]|js}),
-                    )
-                 || Js.Re.test(
                       List.nth(source, 1),
+                    )
+                 || Js.Re.test_(
                       Js.Re.fromString("^( *[\\-\\*\\+] +)[^ ]"),
+                      List.nth(source, 1),
                     )
                )) {
       [List.nth(source, 0)];
@@ -40,7 +40,7 @@ let rec read_till_end: list(string) => list(string) =
 let prepare_line: string => string =
   source =>
     Js.String.replaceByRe(
-      Js.Re.fromStringWithFlags({js|\\<|js}, "g"),
+      Js.Re.fromStringWithFlags({js|\\<|js}, ~flags="g"),
       "&lt;",
       source,
     );

@@ -1,5 +1,5 @@
 let beginsWith4Spaces: string => bool =
-  source => Js.Re.test(source, Js.Re.fromString({js|^ {4,}|js}));
+  source => Js.Re.test_(Js.Re.fromString({js|^ {4,}|js}), source);
 
 let rec readTillEndLine: list(string) => list(string) =
   source =>
@@ -14,6 +14,7 @@ let rec readTillEndLine: list(string) => list(string) =
       switch (source) {
       | [element] => [element]
       | [head, ...tail] => [head, ...readTillEndLine(tail)]
+      | c => c
       };
     };
 

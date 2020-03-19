@@ -1,6 +1,6 @@
 let get_start: list(string) => option(BlockTypes.atx_style_header) =
   source =>
-    if (Js.Re.test(List.hd(source), Js.Re.fromString({js|^#|js}))) {
+    if (Js.Re.test_(Js.Re.fromString({js|^#|js}), List.hd(source))) {
       Some({line: List.hd(source)});
     } else {
       None;
@@ -35,7 +35,7 @@ let get_markdown: (int, AST.spans, BlockContext.t) => list(string) =
   (level, spans, context) => {
     let output: ref(string) = ref("");
 
-    for (count in 1 to level) {
+    for (_count in 1 to level) {
       output := output^ ++ "#";
     };
 

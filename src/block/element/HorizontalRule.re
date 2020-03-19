@@ -1,10 +1,10 @@
 let get_start: list(string) => option(BlockTypes.horizontal_rule) =
   source =>
-    if (Js.Re.test(
-          List.hd(source),
+    if (Js.Re.test_(
           Js.Re.fromString(
             "^ *((\\* *\\* *\\* *[* ]*)|(- *- *- *[- ]*)|(_ *_ *_ *[_ ]*))$",
           ),
+          List.hd(source),
         )) {
       Some();
     } else {

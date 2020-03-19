@@ -1,9 +1,9 @@
 let get_start: list(string) => option(BlockTypes.setext_style_header) =
   source =>
     if (List.length(source) > 1
-        && Js.Re.test(
-             List.nth(source, 1),
+        && Js.Re.test_(
              Js.Re.fromString({js|^(-+|=+) *$|js}),
+             List.nth(source, 1),
            )) {
       Some({text: List.hd(source), secondLine: List.nth(source, 1)});
     } else {

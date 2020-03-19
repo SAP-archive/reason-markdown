@@ -228,7 +228,7 @@ let identify: (Stack.t(SpanTypes.t), string, int) => int =
       );
 
     stack := new_stack;
-    if (Js.Re.test(remaining_sequence, Regex.square_bracket_open)) {
+    if (Js.Re.test_(Regex.square_bracket_open, remaining_sequence)) {
       Stack.push(
         Node({
           tagString: "[",
@@ -239,7 +239,7 @@ let identify: (Stack.t(SpanTypes.t), string, int) => int =
         stack^,
       );
       1;
-    } else if (Js.Re.test(remaining_sequence, Regex.square_bracket_close)) {
+    } else if (Js.Re.test_(Regex.square_bracket_close, remaining_sequence)) {
       if (top_link_node_exists()) {
         switch (identify_reference_id_link(remaining_sequence)) {
         | Some(result) => result
@@ -263,7 +263,7 @@ let rec find_reference_id:
   (list(BlockContext.reference), string) => option(string) =
   (reference, url) =>
     switch (reference) {
-    | [(reference_id, link_url, link_title), ...tail] =>
+    | [(reference_id, link_url, _link_title), ...tail] =>
       if (link_url == url) {
         Some(reference_id);
       } else {

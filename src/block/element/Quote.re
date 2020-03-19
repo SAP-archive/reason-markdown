@@ -1,7 +1,7 @@
 let is_start_line: string => bool =
   source => {
     let regex = Js.Re.fromString({js|^\u0020*>|js});
-    Js.Re.test(source, regex);
+    Js.Re.test_(regex, source);
   };
 
 let rec read_till_end_line: list(string) => list(string) =
@@ -12,23 +12,23 @@ let rec read_till_end_line: list(string) => list(string) =
         && Util.isBlankLine(List.nth(source, 1))) {
       [];
     } else if (Util.isBlankLine(List.nth(source, 0))
-               && Js.Re.test(
-                    List.nth(source, 1),
+               && Js.Re.test_(
                     Js.Re.fromString({js|^\u0020{4,}|js}),
+                    List.nth(source, 1),
                   )) {
       [];
     } else if (Util.isBlankLine(List.nth(source, 0))
-               && Js.Re.test(
-                    List.nth(source, 1),
+               && Js.Re.test_(
                     Js.Re.fromString({js|^\u0020*[^>]|js}),
+                    List.nth(source, 1),
                   )) {
       [];
     } else if (Util.isBlankLine(List.nth(source, 0))
-               && Js.Re.test(
-                    List.nth(source, 1),
+               && Js.Re.test_(
                     Js.Re.fromString(
                       "^ {0,3}((\\* *\\* *\\* *[* ]*)|(- *- *- *[- ]*)|(_ *_ *_ *[_ ]*))",
                     ),
+                    List.nth(source, 1),
                   )) {
       [];
     } else {

@@ -5,7 +5,7 @@ let simplify: string => string =
     Js.String.replaceByRe(
       Js.Re.fromStringWithFlags(
         {js|[\u0009\u000A\u000C\u000D\u0020]+|js},
-        "g",
+        ~flags="g",
       ),
       {js|\u0020|js},
       trim(source),
@@ -14,7 +14,7 @@ let simplify: string => string =
 let simplifyLineBreaks: string => string =
   source =>
     Js.String.replaceByRe(
-      Js.Re.fromStringWithFlags({js|\u000D\u000A|js}, "g"),
+      Js.Re.fromStringWithFlags({js|\u000D\u000A|js}, ~flags="g"),
       {js|\u000A|js},
       source,
     );
@@ -106,97 +106,213 @@ let rec removeNFirst: (list('a), int) => list('a) =
       source;
     } else {
       switch (source) {
-      | [head, ...tail] => removeNFirst(tail, n - 1)
+      | [_head, ...tail] => removeNFirst(tail, n - 1)
       | [] => []
       };
     };
 
 let process_url: string => string =
   source => {
-    let find_regex = Js.Re.fromStringWithFlags("[\\s<>]", "g");
+    let find_regex = Js.Re.fromStringWithFlags("[\\s<>]", ~flags="g");
 
     Js.String.replaceByRe(find_regex, "", source);
   };
 
-let rec concat_text: (AST.spans, string) => AST.spans = (remaining, text) => {
-  switch (remaining) {
-  | [head, ...tail] =>
-    switch (head) {
-    | Text(following_text) =>
-      concat_text(tail, String.concat("", [text, following_text]));
-    | span =>
-      if (String.length(text) > 0) {
-        [Text(text), span, ...concat_text(tail, "")]
-      } else {
-        [span, ...concat_text(tail, "")]
+let rec concat_text: (AST.spans, string) => AST.spans =
+  (remaining, text) => {
+    switch (remaining) {
+    | [head, ...tail] =>
+      switch (head) {
+      | Text(following_text) =>
+        concat_text(tail, String.concat("", [text, following_text]))
+      | span =>
+        if (String.length(text) > 0) {
+          [Text(text), span, ...concat_text(tail, "")];
+        } else {
+          [span, ...concat_text(tail, "")];
+        }
       }
-    }
-  | [] =>
-    if (String.length(text) > 0) {
-      [Text(text)]
-    } else {
-      []
-    }
-  }
-};
-
-let rec simplify_spans_intern: (AST.spans, bool, bool) => AST.spans = (spans, in_emph, in_strong) => {
-  let current_position: ref(int) = ref(0);
-  let new_spans: ref(AST.spans) = ref([]);
-
-  while (current_position^ < List.length(spans)) {
-    let span = List.nth(spans, current_position^);
-
-    switch (span) {
-    | EmphaticStress(pattern, content) =>
-      if (in_emph) {
-        new_spans := List.append(new_spans^, List.append([AST.Text(pattern), ...simplify_spans_intern(content, true, in_strong)], [AST.Text(pattern)]))
-      } else if (List.length(content) == 1 && ! in_strong) {
-          switch (List.hd(content)) {
-          | StrongImportance(strong_pattern, strong_content) =>
-            new_spans := List.append(new_spans^, [AST.EmphaticStressStrongImportance(pattern ++ strong_pattern, simplify_spans_intern(strong_content, true, true))]);
-          | x => new_spans := List.append(new_spans^, [AST.EmphaticStress(pattern, simplify_spans_intern(content, true, in_strong))])
-          }
+    | [] =>
+      if (String.length(text) > 0) {
+        [Text(text)];
       } else {
-        new_spans := List.append(new_spans^, [AST.EmphaticStress(pattern, simplify_spans_intern(content, true, in_strong))]);
-      };
-    | StrongImportance(pattern, content) =>
-      if (in_strong) {
-        new_spans := List.append(new_spans^, List.append([AST.Text(pattern), ...simplify_spans_intern(content, in_emph, true)], [AST.Text(pattern)]))
-      } else if (List.length(content) == 1 && ! in_emph) {
-          switch (List.hd(content)) {
-          | EmphaticStress(emph_pattern, emph_content) =>
-          new_spans := List.append(new_spans^, [AST.EmphaticStressStrongImportance(pattern ++ emph_pattern, simplify_spans_intern(emph_content, true, true))]);
-          }
-      } else {
-        new_spans := List.append(new_spans^, [AST.StrongImportance(pattern, simplify_spans_intern(content, in_emph, true))]);
-      };
-    | EmphaticStressStrongImportance(pattern, content) =>
-      if (in_emph && in_strong) {
-        new_spans := List.append(new_spans^, List.append([AST.Text(pattern), ...simplify_spans_intern(content, true, true)], [AST.Text(pattern)]))
-      } else if (in_emph && ! in_strong) {
-        new_spans := List.append(new_spans^, List.append(new_spans^, [AST.StrongImportance(String.sub(pattern, 0, 2), simplify_spans_intern(content, true, true))]));
-      } else if (in_strong && ! in_emph) {
-        new_spans := List.append(new_spans^, List.append(new_spans^, [AST.EmphaticStress(String.sub(pattern, 0, 2), simplify_spans_intern(content, true, true))]));
-      } else {
-        new_spans := List.append(new_spans^, List.append(new_spans^, [AST.EmphaticStressStrongImportance(pattern, simplify_spans_intern(content, true, true))]));
-      };
-    | c => new_spans := List.append(new_spans^, [c]);
+        [];
+      }
     };
-
-    current_position := current_position^ + 1;
   };
 
-  concat_text(new_spans^, "");
-};
+let rec simplify_spans_intern: (AST.spans, bool, bool) => AST.spans =
+  (spans, in_emph, in_strong) => {
+    let current_position: ref(int) = ref(0);
+    let new_spans: ref(AST.spans) = ref([]);
 
-let rec simplify_spans: AST.spans => AST.spans = spans =>
-  simplify_spans_intern(spans, false, false);
+    while (current_position^ < List.length(spans)) {
+      let span = List.nth(spans, current_position^);
+
+      switch (span) {
+      | EmphaticStress(pattern, content) =>
+        if (in_emph) {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                [
+                  AST.Text(pattern),
+                  ...simplify_spans_intern(content, true, in_strong),
+                ],
+                [AST.Text(pattern)],
+              ),
+            );
+        } else if (List.length(content) == 1 && !in_strong) {
+          switch (List.hd(content)) {
+          | StrongImportance(strong_pattern, strong_content) =>
+            new_spans :=
+              List.append(
+                new_spans^,
+                [
+                  AST.EmphaticStressStrongImportance(
+                    pattern ++ strong_pattern,
+                    simplify_spans_intern(strong_content, true, true),
+                  ),
+                ],
+              )
+          | _ =>
+            new_spans :=
+              List.append(
+                new_spans^,
+                [
+                  AST.EmphaticStress(
+                    pattern,
+                    simplify_spans_intern(content, true, in_strong),
+                  ),
+                ],
+              )
+          };
+        } else {
+          new_spans :=
+            List.append(
+              new_spans^,
+              [
+                AST.EmphaticStress(
+                  pattern,
+                  simplify_spans_intern(content, true, in_strong),
+                ),
+              ],
+            );
+        }
+      | StrongImportance(pattern, content) =>
+        if (in_strong) {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                [
+                  AST.Text(pattern),
+                  ...simplify_spans_intern(content, in_emph, true),
+                ],
+                [AST.Text(pattern)],
+              ),
+            );
+        } else if (List.length(content) == 1 && !in_emph) {
+          switch (List.hd(content)) {
+          | EmphaticStress(emph_pattern, emph_content) =>
+            new_spans :=
+              List.append(
+                new_spans^,
+                [
+                  AST.EmphaticStressStrongImportance(
+                    pattern ++ emph_pattern,
+                    simplify_spans_intern(emph_content, true, true),
+                  ),
+                ],
+              )
+          | _ => ()
+          };
+        } else {
+          new_spans :=
+            List.append(
+              new_spans^,
+              [
+                AST.StrongImportance(
+                  pattern,
+                  simplify_spans_intern(content, in_emph, true),
+                ),
+              ],
+            );
+        }
+      | EmphaticStressStrongImportance(pattern, content) =>
+        if (in_emph && in_strong) {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                [
+                  AST.Text(pattern),
+                  ...simplify_spans_intern(content, true, true),
+                ],
+                [AST.Text(pattern)],
+              ),
+            );
+        } else if (in_emph && !in_strong) {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                new_spans^,
+                [
+                  AST.StrongImportance(
+                    String.sub(pattern, 0, 2),
+                    simplify_spans_intern(content, true, true),
+                  ),
+                ],
+              ),
+            );
+        } else if (in_strong && !in_emph) {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                new_spans^,
+                [
+                  AST.EmphaticStress(
+                    String.sub(pattern, 0, 2),
+                    simplify_spans_intern(content, true, true),
+                  ),
+                ],
+              ),
+            );
+        } else {
+          new_spans :=
+            List.append(
+              new_spans^,
+              List.append(
+                new_spans^,
+                [
+                  AST.EmphaticStressStrongImportance(
+                    pattern,
+                    simplify_spans_intern(content, true, true),
+                  ),
+                ],
+              ),
+            );
+        }
+      | c => new_spans := List.append(new_spans^, [c])
+      };
+
+      current_position := current_position^ + 1;
+    };
+
+    concat_text(new_spans^, "");
+  };
+
+let simplify_spans: AST.spans => AST.spans =
+  spans => simplify_spans_intern(spans, false, false);
 
 let rec simplify_ast: AST.t => AST.t =
   ast => {
-    List.map((block: AST.block) => {
-      switch (block) {
+    List.map(
+      (block: AST.block) => {
+        switch (block) {
         | Heading(level, spans) => AST.Heading(level, simplify_spans(spans))
         | Paragraph(spans) => AST.Paragraph(simplify_spans(spans))
         | Quote(blocks) => AST.Quote(simplify_ast(blocks))
@@ -205,14 +321,17 @@ let rec simplify_ast: AST.t => AST.t =
         | OrderedList(items) =>
           AST.OrderedList(
             List.map(
-              (item: AST.ordered_list_item) => {
-                AST.number: item.number,
-                AST.blocks: simplify_ast(item.blocks),
-              },
+              (item: AST.ordered_list_item) =>
+                {
+                  AST.number: item.number,
+                  AST.blocks: simplify_ast(item.blocks),
+                },
               items,
             ),
           )
         | block => block
-        };
-    }, ast);
+        }
+      },
+      ast,
+    );
   };

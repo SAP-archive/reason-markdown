@@ -9,9 +9,9 @@ let () =
           expect(TestUtil.Span.Emphasis.emphasis_variants_ast)
           |> toEqual(
                Span.get_ast(
-                 Span.identify(
-                   [TestUtil.Span.Emphasis.emphasis_variants_markdown],
-                 ),
+                 Span.identify([
+                   TestUtil.Span.Emphasis.emphasis_variants_markdown,
+                 ]),
                  {references: []},
                ),
              )
@@ -20,9 +20,9 @@ let () =
           expect(TestUtil.Span.Emphasis.emphasis_flanking_ast)
           |> toEqual(
                Span.get_ast(
-                 Span.identify(
-                   [TestUtil.Span.Emphasis.emphasis_flanking_markdown],
-                 ),
+                 Span.identify([
+                   TestUtil.Span.Emphasis.emphasis_flanking_markdown,
+                 ]),
                  {references: []},
                ),
              )
@@ -31,9 +31,9 @@ let () =
           expect(TestUtil.Span.Emphasis.emphasis_interlaced_ast)
           |> toEqual(
                Span.get_ast(
-                 Span.identify(
-                   [TestUtil.Span.Emphasis.emphasis_interlaced_markdown],
-                 ),
+                 Span.identify([
+                   TestUtil.Span.Emphasis.emphasis_interlaced_markdown,
+                 ]),
                  {references: []},
                ),
              )
@@ -82,9 +82,9 @@ let () =
           expect(TestUtil.Span.Link.link_with_references_ast(references))
           |> toEqual(
                Span.get_ast(
-                 Span.identify(
-                   [TestUtil.Span.Link.link_with_references_markdown],
-                 ),
+                 Span.identify([
+                   TestUtil.Span.Link.link_with_references_markdown,
+                 ]),
                  {references: references},
                ),
              );
@@ -116,9 +116,9 @@ let () =
           expect(TestUtil.Span.Image.image_with_references_ast(references))
           |> toEqual(
                Span.get_ast(
-                 Span.identify(
-                   [TestUtil.Span.Image.image_with_references_markdown],
-                 ),
+                 Span.identify([
+                   TestUtil.Span.Image.image_with_references_markdown,
+                 ]),
                  {references: references},
                ),
              );

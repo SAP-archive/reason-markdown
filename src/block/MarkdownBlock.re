@@ -28,10 +28,7 @@ let identify_blocks: list(string) => (list(BlockTypes.t), BlockContext.t) =
           switch (ReferenceResolution.interprete(block)) {
           | Some(data) =>
             context :=
-              {
-                ...context^,
-                references: List.append(context^.references, [data]),
-              }
+              {references: List.append(context^.references, [data])}
           | None => ()
           };
 
@@ -184,7 +181,6 @@ let rec get_ast: (list(BlockTypes.t), BlockContext.t) => AST.t =
 
               current_context :=
                 {
-                  ...current_context^,
                   references:
                     List.append(
                       current_context^.references,
@@ -209,7 +205,6 @@ let rec get_ast: (list(BlockTypes.t), BlockContext.t) => AST.t =
 
               current_context :=
                 {
-                  ...current_context^,
                   references:
                     List.append(
                       current_context^.references,
@@ -222,7 +217,6 @@ let rec get_ast: (list(BlockTypes.t), BlockContext.t) => AST.t =
             items,
           );
         ast := List.append(ast^, [UnorderedList(items_ast)]);
-      | _ => ()
       };
 
       current_position := current_position^ + 1;
@@ -349,7 +343,7 @@ let rec get_markdown: (AST.t, BlockContext.t, bool) => list(string) =
         lines := List.append(lines^, ordered_list_lines^);
       };
 
-      if (! is_inner) {
+      if (!is_inner) {
         lines := List.append(lines^, ["\n"]);
       };
 

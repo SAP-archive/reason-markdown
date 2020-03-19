@@ -8,9 +8,12 @@ let markdown_to_ast: string => AST.t =
 
 let ast_to_markdown: AST.t => string =
   ast => {
-    let context: BlockContext.t = {references: MarkdownBlock.get_context(ast)};
+    let context: BlockContext.t = {
+      references: MarkdownBlock.get_context(ast),
+    };
 
-    let lines: list(string) = MarkdownBlock.get_markdown(ast, context, false);
+    let lines: list(string) =
+      MarkdownBlock.get_markdown(ast, context, false);
 
     String.concat("\n", lines);
   };
