@@ -7,13 +7,13 @@ module type S = {
 
     let unparseBlock: (ParserV2.block, ~blockUnparser: list(ParserV2.block) => string, ~spanUnparser: list(ParserV2.span) => string) => string;
 
-    let decodeSpan: (Js.Json.t, ~spanDecoder: Js.Json.t => list(ParserV2.span)) => option(ParserV2.span);
+    let decodeSpan: (string, Js.Json.t, ~spanDecoder: Js.Json.t => option(list(ParserV2.span))) => option(ParserV2.span);
 
-    let decodeBlock: (Js.Json.t, ~blockDecoder: Js.Json.t => list(ParserV2.block), ~spanDecoder: Js.Json.t => list(ParserV2.span)) => option(ParserV2.block);
+    let decodeBlock: (string, Js.Json.t, ~blockDecoder: Js.Json.t => option(list(ParserV2.block)), ~spanDecoder: Js.Json.t => option(list(ParserV2.span))) => option(ParserV2.block);
 
-    let encodeSpan: (ParserV2.span, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => Js.Json.t;
+    let encodeSpan: (ParserV2.span, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => (string, Js.Json.t);
 
-    let encodeBlock: (ParserV2.block, ~blockEncoder: list(ParserV2.block) => Js.Json.t, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => Js.Json.t;
+    let encodeBlock: (ParserV2.block, ~blockEncoder: list(ParserV2.block) => Js.Json.t, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => (string, Js.Json.t);
 };
 
 exception NoSuitableBlockFound;

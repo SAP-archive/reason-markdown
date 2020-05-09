@@ -1,21 +1,19 @@
-open ParserV2;
-
 module type S = {
-    let parseSpan: (string, ~spanParser: string => list(span)) => span;
+    let parseSpan: (string, ~spanParser: string => list(ParserV2.span)) => ParserV2.span;
 
-    let parseBlock: (string, ~blockParser: string => list(block), ~spanParser: string => list(span)) => block;
+    let parseBlock: (string, ~blockParser: string => list(ParserV2.block), ~spanParser: string => list(ParserV2.span)) => ParserV2.block;
 
-    let unparseSpan: (span, ~spanUnparser: list(span) => string) => string;
+    let unparseSpan: (ParserV2.span, ~spanUnparser: list(ParserV2.span) => string) => string;
 
-    let unparseBlock: (block, ~blockUnparser: list(block) => string, ~spanUnparser: list(span) => string) => string;
+    let unparseBlock: (ParserV2.block, ~blockUnparser: list(ParserV2.block) => string, ~spanUnparser: list(ParserV2.span) => string) => string;
 
-    let decodeSpan: (Js.Json.t, ~spanDecoder: Js.Json.t => list(span)) => option(span);
+    let decodeSpan: (string, Js.Json.t, ~spanDecoder: Js.Json.t => option(list(ParserV2.span))) => option(ParserV2.span);
 
-    let decodeBlock: (Js.Json.t, ~blockDecoder: Js.Json.t => list(block), ~spanDecoder: Js.Json.t => list(span)) => option(block);
+    let decodeBlock: (string, Js.Json.t, ~blockDecoder: Js.Json.t => option(list(ParserV2.block)), ~spanDecoder: Js.Json.t => option(list(ParserV2.span))) => option(ParserV2.block);
 
-    let encodeSpan: (span, ~spanEncoder: list(span) => Js.Json.t) => Js.Json.t;
+    let encodeSpan: (ParserV2.span, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => (string, Js.Json.t);
 
-    let encodeBlock: (block, ~blockEncoder: list(block) => Js.Json.t, ~spanEncoder: list(span) => Js.Json.t) => Js.Json.t;
+    let encodeBlock: (ParserV2.block, ~blockEncoder: list(ParserV2.block) => Js.Json.t, ~spanEncoder: list(ParserV2.span) => Js.Json.t) => (string, Js.Json.t);
 };
 
 exception NoSuitableBlockFound;
@@ -30,9 +28,9 @@ module Base: S = {
 
     let unparseBlock = (_, ~blockUnparser as _, ~spanUnparser as _) => raise(NoSuitableBlockFound);
 
-    let decodeSpan = (_, ~spanDecoder as _) => None;
+    let decodeSpan = (_, _, ~spanDecoder as _) => None;
 
-    let decodeBlock = (_, ~blockDecoder as _, ~spanDecoder as _) => None;
+    let decodeBlock = (_, _, ~blockDecoder as _, ~spanDecoder as _) => None;
 
     let encodeSpan = (_, ~spanEncoder as _) => raise(NoSuitableSpanFound);
 
@@ -54,31 +52,17 @@ module AddSpanParser = (Parser: S, SpanParser: SpanParser.S) => {
         | _ => unparseSpan(span, ~spanUnparser);
         };
     
-    let decodeSpan = (json, ~spanDecoder) => 
-        json
-        ->Js.Json.decodeObject
-        ->Belt.Option.flatMap(dict => 
-            dict
-            ->Js.Dict.get("variant")
-            ->Belt.Option.flatMap(Js.Json.decodeString)
-            ->Belt.Option.flatMap(variant =>
-                if (variant == SpanParser.name) {
-                    dict
-                    ->Js.Dict.get("value")
-                    ->Belt.Option.flatMap(SpanParser.tryDecode(_, ~spanDecoder))
-                } else {
-                    None
-                }
-            )
-        );
+    let decodeSpan = (variantTag, json, ~spanDecoder) => 
+        if (variantTag == SpanParser.name) {
+            SpanParser.tryDecode(json, ~spanDecoder)
+            ->Belt.Option.map(t => SpanParser.Span(t));
+        } else {
+            decodeSpan(variantTag, json, ~spanDecoder);
+        };
 
     let encodeSpan = (span, ~spanEncoder) =>
         switch (span) {
-        | SpanParser.Span(t) => 
-            Js.Json.object_(Js.Dict.fromArray([|
-                ("variant", Js.Json.string(SpanParser.name)),
-                ("value", SpanParser.encode(t, ~spanEncoder))
-            |]))
+        | SpanParser.Span(t) => (SpanParser.name, SpanParser.encode(t, ~spanEncoder))
         | _ => encodeSpan(span, ~spanEncoder)
         };
 };
@@ -98,31 +82,17 @@ module AddBlockParser = (Parser: S, BlockParser: BlockParser.S) => {
         | _ => unparseBlock(block, ~blockUnparser, ~spanUnparser);
         };
     
-    let decodeBlock = (json, ~blockDecoder, ~spanDecoder) => 
-        json
-        ->Js.Json.decodeObject
-        ->Belt.Option.flatMap(dict => 
-            dict
-            ->Js.Dict.get("variant")
-            ->Belt.Option.flatMap(Js.Json.decodeString)
-            ->Belt.Option.flatMap(variant =>
-                if (variant == BlockParser.name) {
-                    dict
-                    ->Js.Dict.get("value")
-                    ->Belt.Option.flatMap(BlockParser.tryDecode(_, ~blockDecoder, ~spanDecoder))
-                } else {
-                    None
-                }
-            )
-        );
+    let decodeBlock = (variantTag, json, ~blockDecoder, ~spanDecoder) => 
+        if (variantTag == BlockParser.name) {
+            BlockParser.tryDecode(json, ~blockDecoder, ~spanDecoder)
+            ->Belt.Option.map(t => BlockParser.Block(t));
+        } else {
+            decodeBlock(variantTag, json, ~blockDecoder, ~spanDecoder);
+        };
 
     let encodeBlock = (block, ~blockEncoder, ~spanEncoder) =>
         switch (block) {
-        | BlockParser.Block(t) => 
-            Js.Json.object_(Js.Dict.fromArray([|
-                ("variant", Js.Json.string(BlockParser.name)),
-                ("value", BlockParser.encode(t, ~blockEncoder, ~spanEncoder))
-            |]))
+        | BlockParser.Block(t) => (BlockParser.name, BlockParser.encode(t, ~blockEncoder, ~spanEncoder))
         | _ => encodeBlock(block, ~blockEncoder, ~spanEncoder)
         };
 };
@@ -162,35 +132,95 @@ module Build = (Parser: S) => {
 
     let unparse = unparseBlocks;
 
-    let /*rec*/ _decodeSpans = _json => {
-        /*
-         * until no more json call decodeSpan(json, ~spanDecoder)
-         */
-        assert(false);
-    };
+    let decodeSpanObject = (json, spanDecoder) =>
+        json
+        ->Js.Json.decodeObject
+        ->Belt.Option.flatMap(dict => 
+            dict
+            ->Js.Dict.get("variant")
+            ->Belt.Option.flatMap(Js.Json.decodeString)
+            ->Belt.Option.flatMap(variantTag => 
+                dict
+                ->Js.Dict.get("value")
+                ->Belt.Option.flatMap(json =>
+                    decodeSpan(variantTag, json, ~spanDecoder)
+                )
+            )
+        );
 
-    let /*rec*/ decodeBlocks = _json => {
-        /*
-         * until no more json call decodeBlock(json, ~blockDecoder, ~spanDecoder)
-         */
-        assert(false);
-    };
+    let rec decodeSpans = json => 
+        json
+        ->Js.Json.decodeArray
+        ->Belt.Option.flatMap(jsonArray =>
+            jsonArray
+            ->Belt.Array.reduce(Some([||]), (traversed, json) => 
+                traversed
+                ->Belt.Option.flatMap(spans => 
+                    decodeSpanObject(json, decodeSpans)
+                    ->Belt.Option.map(span => Belt.Array.concat(spans, [|span|])) 
+                )
+            )
+        )
+        ->Belt.Option.map(Belt.List.fromArray);
+
+    let decodeBlockObject = (json, blockDecoder, spanDecoder) =>
+        json
+        ->Js.Json.decodeObject
+        ->Belt.Option.flatMap(dict => 
+            dict
+            ->Js.Dict.get("variant")
+            ->Belt.Option.flatMap(Js.Json.decodeString)
+            ->Belt.Option.flatMap(variantTag => 
+                dict
+                ->Js.Dict.get("value")
+                ->Belt.Option.flatMap(json =>
+                    decodeBlock(variantTag, json, ~blockDecoder, ~spanDecoder)
+                )
+            )
+        );
+
+    let rec decodeBlocks = json => 
+        json
+        ->Js.Json.decodeArray
+        ->Belt.Option.flatMap(jsonArray =>
+            jsonArray
+            ->Belt.Array.reduce(Some([||]), (traversed, json) => 
+                traversed
+                ->Belt.Option.flatMap(blocks => 
+                    decodeBlockObject(json, decodeBlocks, decodeSpans)
+                    ->Belt.Option.map(block => Belt.Array.concat(blocks, [|block|])) 
+                )
+            )
+        )
+        ->Belt.Option.map(Belt.List.fromArray);
 
     let decode = decodeBlocks;
 
-    let /*rec*/ _encodeSpans = _spans => {
-        /*
-         * until no more spans call encodeSpan(span, ~spanEncoder)
-         */
-        assert(false);
-    };
+    let rec encodeSpans = spans =>
+        spans
+        ->Belt.List.map(json => {
+            let (variantTag, value) = encodeSpan(json, ~spanEncoder=encodeSpans);
 
-    let /*rec*/ encodeBlocks = _blocks => {
-        /*
-         * until no more blocks call encodeBlock(json, ~blockEncoder, ~spanDecoder)
-         */
-        assert(false);
-    };
+            Js.Json.object_(Js.Dict.fromArray([|
+                ("variant", Js.Json.string(variantTag)),
+                ("value", value)
+            |]));
+        })
+        ->Belt.List.toArray
+        ->Js.Json.array;
+
+    let rec encodeBlocks = blocks =>
+        blocks
+        ->Belt.List.map(json => {
+            let (variantTag, value) = encodeBlock(json, ~blockEncoder=encodeBlocks, ~spanEncoder=encodeSpans);
+
+            Js.Json.object_(Js.Dict.fromArray([|
+                ("variant", Js.Json.string(variantTag)),
+                ("value", value)
+            |]));
+        })
+        ->Belt.List.toArray
+        ->Js.Json.array;
 
     let encode = encodeBlocks;
 };
