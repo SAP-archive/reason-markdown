@@ -132,7 +132,7 @@ module Build = (Parser: S) => {
 
     let unparse = unparseBlocks;
 
-    let decodeSpanObject = (json, spanDecoder) =>
+    let variantTagAndValueFromJson = json =>
         json
         ->Js.Json.decodeObject
         ->Belt.Option.flatMap(dict => 
@@ -142,56 +142,45 @@ module Build = (Parser: S) => {
             ->Belt.Option.flatMap(variantTag => 
                 dict
                 ->Js.Dict.get("value")
-                ->Belt.Option.flatMap(json =>
-                    decodeSpan(variantTag, json, ~spanDecoder)
-                )
+                ->Belt.Option.map(value => (variantTag, value))
             )
         );
+
+    let variantTagAndValueToJson = (variantTag, value) =>
+        Js.Json.object_(Js.Dict.fromArray([|
+            ("variant", Js.Json.string(variantTag)),
+            ("value", value)
+        |]));
+
+    let optionTraverseArray = (elements, f) =>
+        elements
+        ->Belt.Array.reduce(Some([||]), (traversed, element) => 
+            traversed
+            ->Belt.Option.flatMap(elements => 
+                element
+                ->f
+                ->Belt.Option.map(element => Belt.Array.concat(elements, [|element|]))
+            )
+        );
+
+    let decodeSpanObject = (json, spanDecoder) => 
+        variantTagAndValueFromJson(json)
+        ->Belt.Option.flatMap(((variantTag, value)) => decodeSpan(variantTag, value, ~spanDecoder));
 
     let rec decodeSpans = json => 
         json
         ->Js.Json.decodeArray
-        ->Belt.Option.flatMap(jsonArray =>
-            jsonArray
-            ->Belt.Array.reduce(Some([||]), (traversed, json) => 
-                traversed
-                ->Belt.Option.flatMap(spans => 
-                    decodeSpanObject(json, decodeSpans)
-                    ->Belt.Option.map(span => Belt.Array.concat(spans, [|span|])) 
-                )
-            )
-        )
+        ->Belt.Option.flatMap(optionTraverseArray(_, decodeSpanObject(_, decodeSpans)))
         ->Belt.Option.map(Belt.List.fromArray);
 
     let decodeBlockObject = (json, blockDecoder, spanDecoder) =>
-        json
-        ->Js.Json.decodeObject
-        ->Belt.Option.flatMap(dict => 
-            dict
-            ->Js.Dict.get("variant")
-            ->Belt.Option.flatMap(Js.Json.decodeString)
-            ->Belt.Option.flatMap(variantTag => 
-                dict
-                ->Js.Dict.get("value")
-                ->Belt.Option.flatMap(json =>
-                    decodeBlock(variantTag, json, ~blockDecoder, ~spanDecoder)
-                )
-            )
-        );
+        variantTagAndValueFromJson(json)
+        ->Belt.Option.flatMap(((variantTag, value)) => decodeBlock(variantTag, value, ~blockDecoder, ~spanDecoder));
 
     let rec decodeBlocks = json => 
         json
         ->Js.Json.decodeArray
-        ->Belt.Option.flatMap(jsonArray =>
-            jsonArray
-            ->Belt.Array.reduce(Some([||]), (traversed, json) => 
-                traversed
-                ->Belt.Option.flatMap(blocks => 
-                    decodeBlockObject(json, decodeBlocks, decodeSpans)
-                    ->Belt.Option.map(block => Belt.Array.concat(blocks, [|block|])) 
-                )
-            )
-        )
+        ->Belt.Option.flatMap(optionTraverseArray(_, decodeBlockObject(_, decodeBlocks, decodeSpans)))
         ->Belt.Option.map(Belt.List.fromArray);
 
     let decode = decodeBlocks;
@@ -201,10 +190,7 @@ module Build = (Parser: S) => {
         ->Belt.List.map(json => {
             let (variantTag, value) = encodeSpan(json, ~spanEncoder=encodeSpans);
 
-            Js.Json.object_(Js.Dict.fromArray([|
-                ("variant", Js.Json.string(variantTag)),
-                ("value", value)
-            |]));
+            variantTagAndValueToJson(variantTag, value);
         })
         ->Belt.List.toArray
         ->Js.Json.array;
@@ -214,10 +200,7 @@ module Build = (Parser: S) => {
         ->Belt.List.map(json => {
             let (variantTag, value) = encodeBlock(json, ~blockEncoder=encodeBlocks, ~spanEncoder=encodeSpans);
 
-            Js.Json.object_(Js.Dict.fromArray([|
-                ("variant", Js.Json.string(variantTag)),
-                ("value", value)
-            |]));
+            variantTagAndValueToJson(variantTag, value);
         })
         ->Belt.List.toArray
         ->Js.Json.array;
