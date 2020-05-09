@@ -42,8 +42,8 @@ module AddSpanParser = (Parser: S, SpanParser: SpanParser.S) => {
 
    let parseSpan = (markdown, ~spanParser) => 
         switch (SpanParser.tryParse(markdown, ~spanParser)) {
-            | Some(t) => SpanParser.Span(t)
-            | _ => parseSpan(markdown, ~spanParser)
+        | Some(t) => SpanParser.Span(t)
+        | _ => parseSpan(markdown, ~spanParser)
         };
 
     let unparseSpan = (span, ~spanUnparser) =>
@@ -72,8 +72,8 @@ module AddBlockParser = (Parser: S, BlockParser: BlockParser.S) => {
 
    let parseBlock = (markdown, ~blockParser, ~spanParser) => 
         switch (BlockParser.tryParse(markdown, ~blockParser, ~spanParser)) {
-            | Some(t) => BlockParser.Block(t)
-            | _ => parseBlock(markdown, ~blockParser, ~spanParser)
+        | Some(t) => BlockParser.Block(t)
+        | _ => parseBlock(markdown, ~blockParser, ~spanParser)
         };
 
     let unparseBlock = (block, ~blockUnparser, ~spanUnparser) =>
