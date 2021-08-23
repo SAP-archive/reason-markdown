@@ -1,5 +1,7 @@
 # Markdown parser for REASON
 
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/reason-markdown)](https://api.reuse.software/info/github.com/SAP/reason-markdown)
+
 ## Description
 
 This repository contains a parser for markdown documents (provided in [vanilla-flavored-markdown-syntax](http://www.vfmd.org/)) written in [Reason](https://reasonml.github.io/), which produces an abstract syntax tree (AST). The parser provides two functions:
@@ -263,6 +265,4 @@ You can create inline-code sequences by wrapping a sequence of text into `` ` ``
 
 ## License
 
-Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.
-
-This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the [LICENSE](/LICENSE.txt) file
+Copyright 2018-2021 SAP SE or an SAP affiliate company and reason-markdown contributors. Please see our [LICENSE](LICENSE.txt) for copyright and license information. Detailed information including third-party components and their licensing/copyright information is available [via the REUSE tool](https://api.reuse.software/info/github.com/SAP/reason-markdown).
